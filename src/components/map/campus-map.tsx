@@ -14,15 +14,13 @@
  * limitations under the License.
  *
  * Modified for Karmu: the supplied Google Maps Platform 101 React sample's
- * provider, advanced-marker, pin, and marker-clustering patterns are adapted
+ * provider, advanced-marker, and pin patterns are adapted
  * to render tenant-scoped university parking data.
  */
 
 "use client";
 
-import { MarkerClusterer, type Marker } from "@googlemaps/markerclusterer";
 import { AdvancedMarker, APIProvider, Map, Pin, useMap } from "@vis.gl/react-google-maps";
-import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ParkingLot, ParkingStatus } from "@/domain/parking/types";
 
@@ -52,47 +50,6 @@ function ParkingMarkers({
   onSelectParkingLot,
 }: ParkingMarkersProps) {
   const map = useMap();
-  const [markers, setMarkers] = useState<Record<string, Marker>>({});
-  const clusterer = useRef<MarkerClusterer | null>(null);
-
-  useEffect(() => {
-    if (!map) {
-      return;
-    }
-
-    const instance = new MarkerClusterer({ map });
-    clusterer.current = instance;
-
-    return () => {
-      instance.clearMarkers();
-      instance.onRemove();
-      clusterer.current = null;
-    };
-  }, [map]);
-
-  useEffect(() => {
-    clusterer.current?.clearMarkers();
-    clusterer.current?.addMarkers(Object.values(markers));
-  }, [markers]);
-
-  const setMarkerRef = useCallback((marker: Marker | null, parkingLotId: string) => {
-    setMarkers((currentMarkers) => {
-      if (marker && currentMarkers[parkingLotId] === marker) {
-        return currentMarkers;
-      }
-      if (!marker && !currentMarkers[parkingLotId]) {
-        return currentMarkers;
-      }
-
-      const nextMarkers = { ...currentMarkers };
-      if (marker) {
-        nextMarkers[parkingLotId] = marker;
-      } else {
-        delete nextMarkers[parkingLotId];
-      }
-      return nextMarkers;
-    });
-  }, []);
 
   return parkingLots.map((parkingLot) => {
     const isSelected = parkingLot.parkingLotId === selectedParkingLotId;
@@ -106,7 +63,6 @@ function ParkingMarkers({
           onSelectParkingLot(parkingLot.parkingLotId);
         }}
         position={parkingLot.coordinates}
-        ref={(marker) => setMarkerRef(marker, parkingLot.parkingLotId)}
         title={`${parkingLot.name}, ${parkingLot.currentAvailable}면 남음`}
         zIndex={isSelected ? 10 : 1}
       >

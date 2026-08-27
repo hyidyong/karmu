@@ -2,7 +2,7 @@
 
 import { LoaderCircle, Navigation } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,14 +21,14 @@ export function QuickDeparture({ buildingId }: QuickDepartureProps) {
   const router = useRouter();
   const [phase, setPhase] = useState<DeparturePhase>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [isNavigating, startTransition] = useTransition();
-  const isBusy = isNavigating || phase === "locating" || phase === "calculating" || phase === "fallback";
+  const isBusy = phase === "locating" || phase === "calculating" || phase === "fallback";
 
   async function depart() {
     setError(null);
     try {
       const eta = await requestDepartureEta(buildingId, { onPhase: setPhase });
-      startTransition(() => router.push(buildRecommendationUrl(eta)));
+      setPhase("idle");
+      router.push(buildRecommendationUrl(eta));
     } catch (caught) {
       setPhase("error");
       setError(caught instanceof Error ? caught.message : "경로를 계산하지 못했어요.");

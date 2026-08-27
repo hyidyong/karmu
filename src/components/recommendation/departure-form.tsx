@@ -2,7 +2,7 @@
 
 import { LoaderCircle, Navigation } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -38,8 +38,7 @@ export function DepartureForm({
   const [buildingId, setBuildingId] = useState(initialBuildingId);
   const [phase, setPhase] = useState<DeparturePhase>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [isNavigating, startTransition] = useTransition();
-  const isBusy = isNavigating || phase === "locating" || phase === "calculating" || phase === "fallback";
+  const isBusy = phase === "locating" || phase === "calculating" || phase === "fallback";
   const errorId = error || isInvalid ? "departure-error" : undefined;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -48,7 +47,8 @@ export function DepartureForm({
 
     try {
       const eta = await requestDepartureEta(buildingId, { onPhase: setPhase });
-      startTransition(() => router.push(buildRecommendationUrl(eta)));
+      setPhase("idle");
+      router.push(buildRecommendationUrl(eta));
     } catch (caught) {
       setPhase("error");
       setError(caught instanceof Error ? caught.message : "경로를 계산하지 못했어요.");

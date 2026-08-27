@@ -110,6 +110,7 @@ Create `package.json` with this dependency boundary:
   "name": "karmu",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -262,7 +263,7 @@ describe("rankParkingLots", () => {
       { parkingLotId: "middle", predictedAvailable: 18, capacity: 70, walkMinutes: 7, confidence: 80, status: "moderate" }
     ]);
 
-    expect(results.map((result) => result.parkingLotId)).toEqual(["best", "far", "middle"]);
+    expect(results.map((result) => result.parkingLotId)).toEqual(["best", "middle", "far"]);
     expect(results[0].reasons).toContain("목적지까지 도보 4분");
   });
 });

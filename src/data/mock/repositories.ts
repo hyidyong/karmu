@@ -14,6 +14,14 @@ const EMPTY_VEHICLE_OVERVIEW: VehicleOverview = {
   applicationSteps: [],
 };
 
+function copyVehicleOverview(overview: VehicleOverview): VehicleOverview {
+  return {
+    vehicles: overview.vehicles.map((vehicle) => ({ ...vehicle })),
+    pass: overview.pass ? { ...overview.pass } : null,
+    applicationSteps: overview.applicationSteps.map((step) => ({ ...step })),
+  };
+}
+
 export const universityRepository: UniversityRepository = {
   async getBrand(tenant) {
     const brand = universityBrands.find((item) => item.universityId === tenant.universityId);
@@ -62,8 +70,11 @@ export const recommendationRepository: RecommendationRepository = {
 
 export const vehicleRepository: VehicleRepository = {
   async getOverview(tenant) {
-    return tenant.universityId === "kmu" && tenant.campusId === "kmu-seongseo"
-      ? kmuVehicleOverview
-      : EMPTY_VEHICLE_OVERVIEW;
+    const overview =
+      tenant.universityId === "kmu" && tenant.campusId === "kmu-seongseo"
+        ? kmuVehicleOverview
+        : EMPTY_VEHICLE_OVERVIEW;
+
+    return copyVehicleOverview(overview);
   },
 };

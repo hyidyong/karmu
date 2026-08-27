@@ -6,7 +6,7 @@
 
 **Architecture:** Use Next.js App Router and Server Components for every static/data-composition boundary, with small Client Components only for navigation state, service-worker registration, forms that need local interaction, and Google Maps. Put tenant-aware contracts and mock repositories outside the UI so a later API or Supabase implementation can replace them without changing pages.
 
-**Tech Stack:** Next.js 16.3.3, React 19.2.8, TypeScript 7.0.2, Tailwind CSS 4.3.3, shadcn/ui source components, Vitest 4.1.11, Lucide React 1.34.0, `@vis.gl/react-google-maps` 1.9.0, `@googlemaps/markerclusterer` 2.6.2
+**Tech Stack:** Next.js 16.3.3, React 19.2.8, TypeScript 6.0.3, Tailwind CSS 4.3.3, shadcn/ui source components, Vitest 4.1.11, Lucide React 1.34.0, `@vis.gl/react-google-maps` 1.9.0, `@googlemaps/markerclusterer` 2.6.2
 
 **Spec:** `docs/superpowers/specs/2026-08-27-karmu-mvp-foundation-design.md`
 
@@ -117,7 +117,7 @@ Create `package.json` with this dependency boundary:
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint . --cache"
   },
   "dependencies": {
     "@googlemaps/markerclusterer": "2.6.2",
@@ -132,10 +132,10 @@ Create `package.json` with this dependency boundary:
     "@types/node": "26.4.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.5",
-    "eslint": "10.9.1",
+    "eslint": "9.39.5",
     "eslint-config-next": "16.3.3",
     "tailwindcss": "4.3.3",
-    "typescript": "7.0.2",
+    "typescript": "6.0.3",
     "vitest": "4.1.11"
   }
 }

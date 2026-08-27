@@ -6,6 +6,8 @@ import type {
 } from "@/data/contracts/repositories";
 import type { VehicleOverview } from "@/domain/vehicle/types";
 import { buildings, kmuVehicleOverview, parkingLots, universityBrands } from "@/data/mock/fixtures";
+import { getParkingAccess } from "@/data/mock/parking-access";
+import { predictParkingAt } from "@/lib/recommendation/predict-parking-at";
 import { rankParkingLots } from "@/lib/recommendation/rank-parking-lots";
 
 const EMPTY_VEHICLE_OVERVIEW: VehicleOverview = {
@@ -57,12 +59,30 @@ export const parkingRepository: ParkingRepository = {
 
 export const recommendationRepository: RecommendationRepository = {
   async recommend(tenant, input) {
-    void input;
     const lots = await parkingRepository.listByCampus(tenant);
-    const ranks = rankParkingLots(lots);
+    const eligibleLots = lots.flatMap((lot) => {
+      if (lot.accessType === "staff") {
+        return [];
+      }
+
+      const access = getParkingAccess(lot.parkingLotId, input.buildingId);
+      if (!access) {
+        return [];
+      }
+
+      return [
+        {
+          ...predictParkingAt(lot, input.arrivalAt),
+          walkMinutes: access.walkMinutes,
+          distanceMeters: access.distanceMeters,
+        },
+      ];
+    });
+    const lotsById = new Map(eligibleLots.map((lot) => [lot.parkingLotId, lot]));
+    const ranks = rankParkingLots(eligibleLots);
 
     return ranks.flatMap((rank) => {
-      const parkingLot = lots.find((lot) => lot.parkingLotId === rank.parkingLotId);
+      const parkingLot = lotsById.get(rank.parkingLotId);
       return parkingLot ? [{ parkingLot, score: rank.score, reasons: rank.reasons }] : [];
     });
   },

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { recommendationRepository } from "@/data/mock/repositories";
+import { parkingLots } from "@/data/mock/fixtures";
+import { predictParkingAt } from "@/lib/recommendation/predict-parking-at";
 import { rankParkingLots } from "@/lib/recommendation/rank-parking-lots";
+import { DEFAULT_TENANT } from "@/lib/tenant/default-tenant";
 
 describe("rankParkingLots", () => {
   it("excludes full lots and ranks the remaining three by the documented score", () => {
@@ -68,5 +72,31 @@ describe("rankParkingLots", () => {
     ]);
 
     expect(results.map((result) => result.parkingLotId)).toEqual(["short-walk", "long-walk"]);
+  });
+
+  it("interpolates arrival availability between adjacent trend points", () => {
+    const eastGate = parkingLots.find(
+      (lot) => lot.universityId === "kmu" && lot.parkingLotId === "east-gate",
+    );
+
+    expect(eastGate).toBeDefined();
+    expect(predictParkingAt(eastGate!, "10:30").predictedAvailable).toBe(31);
+  });
+
+  it("returns only student-accessible lots and changes first place by destination", async () => {
+    const library = await recommendationRepository.recommend(DEFAULT_TENANT, {
+      buildingId: "b1",
+      arrivalAt: "10:30",
+    });
+    const engineering = await recommendationRepository.recommend(DEFAULT_TENANT, {
+      buildingId: "b6",
+      arrivalAt: "10:30",
+    });
+
+    expect(library).toHaveLength(3);
+    expect(engineering).toHaveLength(3);
+    expect(library[0].parkingLot.parkingLotId).toBe("east-gate");
+    expect(engineering[0].parkingLot.parkingLotId).toBe("south-gate");
+    expect(library.every((item) => item.parkingLot.accessType !== "staff")).toBe(true);
   });
 });

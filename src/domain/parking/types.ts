@@ -1,6 +1,7 @@
 import type { Coordinates } from "@/domain/university/types";
 
 export type ParkingStatus = "available" | "moderate" | "busy" | "full";
+export type ParkingAccessType = "student" | "staff" | "shared";
 
 export type ParkingTrendPoint = {
   hour: string;
@@ -23,6 +24,7 @@ export type ParkingLot = {
   operatingHours: string;
   feeText: string;
   eligibility: string;
+  accessType: ParkingAccessType;
   trend: ParkingTrendPoint[];
 };
 

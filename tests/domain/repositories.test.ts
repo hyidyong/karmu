@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parkingRepository } from "@/data/mock/repositories";
+import { parkingRepository, universityRepository } from "@/data/mock/repositories";
 import { DEFAULT_TENANT } from "@/lib/tenant/default-tenant";
 
 describe("parkingRepository", () => {
@@ -22,7 +22,17 @@ describe("parkingRepository", () => {
   it("returns only lots inside the requested tenant", async () => {
     const lots = await parkingRepository.listByCampus(DEFAULT_TENANT);
 
-    expect(lots).toHaveLength(4);
+    expect(lots).toHaveLength(8);
     expect(lots.every((lot) => lot.universityId === "kmu" && lot.campusId === "kmu-seongseo")).toBe(true);
+  });
+
+  it("provides the expanded KMU demo inventory", async () => {
+    const [campusBuildings, lots] = await Promise.all([
+      universityRepository.listBuildings(DEFAULT_TENANT),
+      parkingRepository.listByCampus(DEFAULT_TENANT),
+    ]);
+
+    expect(campusBuildings).toHaveLength(10);
+    expect(lots).toHaveLength(8);
   });
 });

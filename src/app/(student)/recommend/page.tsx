@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 
 import { PageFrame } from "@/components/app-shell/page-frame";
 import { SubpageHeader } from "@/components/app-shell/subpage-header";
-import { DestinationForm } from "@/components/recommendation/destination-form";
+import { DepartureForm } from "@/components/recommendation/departure-form";
 import { RecommendationList } from "@/components/recommendation/recommendation-list";
+import { TripSummary } from "@/components/recommendation/trip-summary";
 import { recommendationRepository, universityRepository } from "@/data/mock/repositories";
 import {
   parseRecommendationQuery,
@@ -24,38 +25,55 @@ export default async function RecommendationPage({ searchParams }: Recommendatio
     searchParams,
     universityRepository.listBuildings(DEFAULT_TENANT),
   ]);
-  const hasQuery = query.buildingId !== undefined || query.arrivalAt !== undefined;
+  const hasQuery = Object.values(query).some((value) => value !== undefined);
   const parsedQuery = parseRecommendationQuery(
     query,
     buildings.map((building) => building.buildingId),
   );
-  const recommendations = parsedQuery
+  const recommendations = parsedQuery?.trip
     ? await recommendationRepository.recommend(DEFAULT_TENANT, parsedQuery)
     : [];
+  const selectedBuilding = parsedQuery
+    ? buildings.find((building) => building.buildingId === parsedQuery.buildingId)
+    : undefined;
+  const requestedBuildingId =
+    typeof query.buildingId === "string" &&
+    buildings.some((building) => building.buildingId === query.buildingId)
+      ? query.buildingId
+      : "b1";
 
   return (
     <>
-      <SubpageHeader eyebrow="도착 전에 결정하는 주차" title="주차 추천" />
+      <SubpageHeader eyebrow="출발 전에 결정하는 주차" title="주차 추천" />
       <PageFrame>
         <section aria-labelledby="destination-heading" className="flex flex-col gap-5">
           <div>
             <h1 id="destination-heading" className="text-[2rem] font-bold leading-[1.2] tracking-[-0.04em]">
-              목적지와 도착 시간을<br />알려주세요
+              어디로 출발할까요?
             </h1>
             <p className="mt-2 text-[15px] leading-6 text-muted-foreground">
-              도착할 때 남아 있을 주차면을 예측해 가까운 순서로 추천해요.
+              현재 위치에서 걸리는 시간과 도착 시점의 주차 혼잡도를 한 번에 계산해요.
             </p>
           </div>
-          <DestinationForm
-            arrivalAt={typeof query.arrivalAt === "string" ? query.arrivalAt : undefined}
-            buildingId={typeof query.buildingId === "string" ? query.buildingId : undefined}
+          <DepartureForm
+            initialBuildingId={requestedBuildingId}
             buildings={buildings}
             isInvalid={hasQuery && !parsedQuery}
           />
         </section>
 
-        {parsedQuery ? (
-          <RecommendationList arrivalAt={parsedQuery.arrivalAt} recommendations={recommendations} />
+        {parsedQuery?.trip && selectedBuilding ? (
+          <>
+            <TripSummary
+              arrivalAt={parsedQuery.arrivalAt}
+              destinationName={selectedBuilding.name}
+              trip={parsedQuery.trip}
+            />
+            <RecommendationList
+              query={{ ...parsedQuery, trip: parsedQuery.trip }}
+              recommendations={recommendations}
+            />
+          </>
         ) : (
           <aside className="rounded-[var(--radius)] bg-accent p-5">
             <p className="font-bold text-primary">Karmu가 함께 보는 기준</p>

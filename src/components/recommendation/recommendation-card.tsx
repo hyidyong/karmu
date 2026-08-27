@@ -15,13 +15,13 @@ import type { ParkingRecommendation } from "@/domain/recommendation/types";
 type RecommendationCardProps = {
   recommendation: ParkingRecommendation;
   rank: number;
-  arrivalAt: string;
+  detailQuery: string;
 };
 
 export function RecommendationCard({
   recommendation,
   rank,
-  arrivalAt,
+  detailQuery,
 }: RecommendationCardProps) {
   const { parkingLot, reasons } = recommendation;
 
@@ -65,7 +65,7 @@ export function RecommendationCard({
       <CardFooter className="justify-end">
         <Link
           className="flex min-h-11 items-center gap-1 rounded-[var(--radius)] px-2 text-sm font-bold text-primary"
-          href={`/parking/${parkingLot.parkingLotId}?arrivalAt=${encodeURIComponent(arrivalAt)}`}
+          href={`/parking/${parkingLot.parkingLotId}?${detailQuery}`}
         >
           상세 정보 보기
           <ArrowRight aria-hidden="true" className="size-4" />

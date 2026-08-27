@@ -5,7 +5,7 @@ import { AppHeader } from "@/components/app-shell/app-header";
 import { PageFrame } from "@/components/app-shell/page-frame";
 import { ParkingSummary } from "@/components/parking/parking-summary";
 import { RecommendedParkingCard } from "@/components/parking/recommended-parking-card";
-import { buttonVariants } from "@/components/ui/button";
+import { QuickDeparture } from "@/components/recommendation/quick-departure";
 import {
   parkingRepository,
   recommendationRepository,
@@ -13,7 +13,6 @@ import {
   vehicleRepository,
 } from "@/data/mock/repositories";
 import { DEFAULT_TENANT } from "@/lib/tenant/default-tenant";
-import { cn } from "@/lib/utils";
 
 export default async function HomePage() {
   const [brand, lots, recommendations, vehicleOverview] = await Promise.all([
@@ -38,7 +37,7 @@ export default async function HomePage() {
               어디로 가시나요?
             </h1>
             <p className="mt-2 max-w-[22rem] text-[15px] leading-6 text-muted-foreground">
-              도착 시간을 알려주면 주차장을 미리 찾아드려요.
+              목적지만 고르면 도착 시간과 주차 여유를 자동으로 계산해요.
             </p>
           </div>
 
@@ -50,20 +49,15 @@ export default async function HomePage() {
               <span className="flex size-10 shrink-0 items-center justify-center rounded-[var(--radius)] bg-white text-primary">
                 <MapPin aria-hidden="true" className="size-5" />
               </span>
-              <span className="min-w-0">
-                <span className="block text-xs font-medium text-muted-foreground">목적지</span>
-                <span className="block truncate font-semibold">동산도서관 · 오늘 10:30</span>
-              </span>
+                <span className="min-w-0">
+                  <span className="block text-xs font-medium text-muted-foreground">목적지</span>
+                  <span className="block truncate font-semibold">동산도서관 · 자동 도착 계산</span>
+                </span>
             </span>
             <ArrowRight aria-hidden="true" className="size-5 shrink-0 text-muted-foreground" />
           </Link>
 
-          <Link
-            className={cn(buttonVariants({ size: "lg" }), "w-full shadow-[0_10px_24px_rgb(3_78_162/0.22)]")}
-            href="/recommend?buildingId=b1&arrivalAt=10%3A30"
-          >
-            주차 추천 받기
-          </Link>
+          <QuickDeparture buildingId="b1" />
         </section>
 
         {topRecommendation ? (

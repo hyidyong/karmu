@@ -1,13 +1,17 @@
 import type { ParkingRecommendation } from "@/domain/recommendation/types";
+import type { ParsedRecommendationQuery } from "@/domain/recommendation/types";
+import { buildRecommendationSearchParams } from "@/lib/recommendation/search-params";
 
 import { RecommendationCard } from "./recommendation-card";
 
 type RecommendationListProps = {
   recommendations: ParkingRecommendation[];
-  arrivalAt: string;
+  query: ParsedRecommendationQuery & { trip: NonNullable<ParsedRecommendationQuery["trip"]> };
 };
 
-export function RecommendationList({ recommendations, arrivalAt }: RecommendationListProps) {
+export function RecommendationList({ recommendations, query }: RecommendationListProps) {
+  const detailQuery = buildRecommendationSearchParams(query);
+
   return (
     <section aria-labelledby="recommendation-results-heading" className="flex flex-col gap-4">
       <div>
@@ -22,7 +26,7 @@ export function RecommendationList({ recommendations, arrivalAt }: Recommendatio
       <div className="flex flex-col gap-4">
         {recommendations.map((recommendation, index) => (
           <RecommendationCard
-            arrivalAt={arrivalAt}
+            detailQuery={detailQuery}
             key={recommendation.parkingLot.parkingLotId}
             rank={index + 1}
             recommendation={recommendation}
